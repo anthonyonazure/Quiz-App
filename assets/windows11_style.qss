@@ -1,0 +1,35 @@
+/* windows11_style.qss */
+
+QWidget {
+    font-family: 'Segoe UI';
+    font-size: 11pt;
+}
+
+QPushButton {
+    background-color: #0078D4;
+    color: white;
+    border: 1px solid #005A9E;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+QPushButton:hover {
+    background-color: #005A9E;
+}
+
+QPushButton:pressed {
+    background-color: #004080;
+}
+
+QLabel {
+    color: #333333;
+}
+
+QListWidget {
+    border: 1px solid #CCCCCC;
+}
+
+QListWidget::Here is the full implementation of the quiz app that includes the ability to create quizzes, add questions, remove quizzes, and ensures a Windows 11-like style using PyQt6.
+
+### Project Structure
+Ensure your project structure looks like this:
