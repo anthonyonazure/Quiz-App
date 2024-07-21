@@ -5,7 +5,7 @@ on:
     types: [created]
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -28,7 +28,21 @@ jobs:
     - name: Build with PyInstaller
       run: |
         pyinstaller --name=QuizApp --windowed --onefile --add-data "assets;assets" main.py
-      
+        
+    - name: Debug - List contents of dist directory
+      run: |
+        ls dist
+        
+    - name: Debug - Display PyInstaller output
+      run: |
+        cat *.spec
+        
+    - name: Upload Executable as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: QuizApp
+        path: dist/QuizApp.exe
+        
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
