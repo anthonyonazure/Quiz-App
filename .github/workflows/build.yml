@@ -1,0 +1,43 @@
+name: Code Signing
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  sign:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Install SignTool
+        run: choco install windows-sdk-10-version-2004-all
+
+      - name: Build and Sign
+        env:
+          CERTIFICATE: ${{ secrets.CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+        run: |
+          # Build your app here
+          # Uncomment and modify the line below if you are using pyinstaller to build a Python app
+           pyinstaller --name=QuizApp --windowed --onefile main.py
+          
+          # Convert base64 certificate to pfx
+          echo $env:CERTIFICATE | Out-File -Encoding ASCII cert.txt
+          certutil -decode cert.txt certificate.pfx
+          
+          # Sign the executable
+          & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64\signtool.exe" sign /f certificate.pfx /p $env:CERTIFICATE_PASSWORD /td sha256 /tr http://timestamp.digicert.com /fd sha256 "QuizApp.exe"
+
+      - name: Upload signed artifact
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./QuizApp.exe
+          asset_name: QuizApp.exe
+          asset_content_type: application/octet-stream
