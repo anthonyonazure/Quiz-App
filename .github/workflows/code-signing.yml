@@ -4,35 +4,37 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   sign:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Setup Python
+      uses: actions/setup-python@v4
       with:
-        dotnet-version: 3.1.x
+        python-version: '3.9'
     
-    - name: Install SignTool
+    - name: Install dependencies
       run: |
-        choco install windows-sdk-10-version-2004-all
+        python -m pip install --upgrade pip
+        pip install pyinstaller
     
-    - name: Build and Sign
+    - name: Build with PyInstaller
+      run: pyinstaller --name=QuizApp --windowed --onefile main.py
+    
+    - name: Sign the executable
       env:
         CERTIFICATE: ${{ secrets.CERTIFICATE }}
         CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
       run: |
-        # Build your app here
-        # pyinstaller --name=QuizApp --windowed --onefile main.py
-        
-        # Convert base64 certificate to pfx
         echo $env:CERTIFICATE | Out-File -Encoding ASCII cert.txt
         certutil -decode cert.txt certificate.pfx
-        
-        # Sign the executable
-        & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe" sign /f certificate.pfx /p $env:CERTIFICATE_PASSWORD /td sha256 /tr http://timestamp.digicert.com /fd sha256 "QuizApp.exe"
+        & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe" sign /f certificate.pfx /p $env:CERTIFICATE_PASSWORD /td sha256 /tr http://timestamp.digicert.com /fd sha256 "dist\QuizApp.exe"
 
     - name: Upload signed artifact
       uses: actions/upload-release-asset@v1
@@ -40,6 +42,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./QuizApp.exe
+        asset_path: ./dist/QuizApp.exe
         asset_name: QuizApp.exe
-        asset_content_type: application/octet-stream 
+        asset_content_type: application/octet-stream
