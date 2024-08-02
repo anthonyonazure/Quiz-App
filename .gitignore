@@ -1,0 +1,16 @@
+# Ignore certificate files
+cert.pem
+CERT.pfx
+GitHubCert.pfx
+private_key.pem
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore build files
+/build/
+dist/
+*.pyc
+__pycache__/
+
